@@ -3,18 +3,18 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# ==========================================
-# CORES
-# ==========================================
+# =====================================================
+# CORES DO DASHBOARD
+# =====================================================
 
 AZUL = "#00BFFF"
 AMARELO = "#FDBE2D"
 FUNDO = "#08111f"
 CARD = "#111c2e"
 
-# ==========================================
-# CONFIGURAÇÃO
-# ==========================================
+# =====================================================
+# CONFIGURAÇÃO DA PÁGINA
+# =====================================================
 
 st.set_page_config(
     page_title="Dashboard Devoluções",
@@ -22,11 +22,44 @@ st.set_page_config(
     layout="wide"
 )
 
-# ==========================================
+# =====================================================
+# FORMATAÇÕES BRASIL
+# =====================================================
+
+def moeda(valor):
+
+    try:
+
+        return (
+            f"R$ {abs(valor):,.2f}"
+            .replace(",", "X")
+            .replace(".", ",")
+            .replace("X", ".")
+        )
+
+    except:
+        return "R$ 0,00"
+
+
+def percentual(valor):
+
+    try:
+
+        return (
+            f"{valor:.2f}%"
+            .replace(".", ",")
+        )
+
+    except:
+        return "0,00%"
+
+
+# =====================================================
 # CSS
-# ==========================================
+# =====================================================
 
 st.markdown(f"""
+
 <style>
 
 .stApp {{
@@ -38,7 +71,11 @@ section[data-testid="stSidebar"] {{
 }}
 
 h1,h2,h3,h4 {{
-    color:white;
+    color:white !important;
+}}
+
+.block-container {{
+    padding-top:1rem;
 }}
 
 [data-testid="stMetric"] {{
@@ -46,24 +83,35 @@ h1,h2,h3,h4 {{
     border:1px solid {AZUL};
     border-radius:15px;
     padding:15px;
-    box-shadow:0 0 10px rgba(0,191,255,.3);
+    box-shadow:0px 0px 10px rgba(0,191,255,.30);
+}}
+
+[data-testid="stMetricLabel"] {{
+    color:white;
+}}
+
+[data-testid="stMetricValue"] {{
+    color:white;
 }}
 
 </style>
+
 """, unsafe_allow_html=True)
 
-# ==========================================
-# LEITURA
-# ==========================================
+# =====================================================
+# LEITURA DA PLANILHA
+# =====================================================
 
 ARQUIVO = "dados/Analise_Conta_Corrente.xlsx"
 
+
 @st.cache_data
-def carregar():
+def carregar_dados():
 
     df = pd.read_excel(ARQUIVO)
 
-    campos = [
+    campos_numericos = [
+
         "CONTA_CORRENTE",
         "VLVENDA",
         "TV5",
@@ -71,9 +119,10 @@ def carregar():
         "ACIMA_TABELA",
         "DEV_GRANDES_REDES",
         "DEMAIS_DEV"
+
     ]
 
-    for campo in campos:
+    for campo in campos_numericos:
 
         if campo in df.columns:
 
@@ -82,7 +131,7 @@ def carregar():
                 errors="coerce"
             ).fillna(0)
 
-    # ======================
+    # =====================================
 
     df["DEV_TOTAL"] = (
         df["DEV_GRANDES_REDES"]
@@ -91,59 +140,80 @@ def carregar():
     )
 
     df["IMPACTO_FINANCEIRO"] = (
-        df["DEV_GRANDES_REDES"]
+
+        abs(df["DEV_GRANDES_REDES"])
         +
-        df["DEMAIS_DEV"]
+        abs(df["DEMAIS_DEV"])
         +
-        df["TV11"]
+        abs(df["TV11"])
         +
-        df["TV5"]
+        abs(df["TV5"])
+
     )
 
     return df
 
-df = carregar()
 
-# ==========================================
+df = carregar_dados()
+
+# =====================================================
 # SIDEBAR
-# ==========================================
+# =====================================================
 
-st.sidebar.title("Filtros")
+st.sidebar.title("🎯 FILTROS")
 
 gerente = st.sidebar.multiselect(
     "Gerente",
-    sorted(df["NOMEGERENTE"].dropna().unique())
+    sorted(
+        df["NOMEGERENTE"]
+        .dropna()
+        .unique()
+    )
 )
 
 supervisor = st.sidebar.multiselect(
     "Supervisor",
-    sorted(df["SUPERVISOR"].dropna().unique())
+    sorted(
+        df["SUPERVISOR"]
+        .dropna()
+        .unique()
+    )
 )
 
 rca = st.sidebar.multiselect(
     "RCA",
-    sorted(df["RCA"].dropna().unique())
+    sorted(
+        df["RCA"]
+        .dropna()
+        .unique()
+    )
 )
 
 filtro = df.copy()
 
 if gerente:
+
     filtro = filtro[
-        filtro["NOMEGERENTE"].isin(gerente)
+        filtro["NOMEGERENTE"]
+        .isin(gerente)
     ]
 
 if supervisor:
+
     filtro = filtro[
-        filtro["SUPERVISOR"].isin(supervisor)
+        filtro["SUPERVISOR"]
+        .isin(supervisor)
     ]
 
 if rca:
+
     filtro = filtro[
-        filtro["RCA"].isin(rca)
+        filtro["RCA"]
+        .isin(rca)
     ]
-# ==========================================
+    # =====================================================
 # CABEÇALHO
-# ==========================================
+# =====================================================
 
 st.title("📊 DASHBOARD DE DEVOLUÇÕES")
 
@@ -158,11 +228,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ==========================================
+# =====================================================
 # INDICADORES
-# ==========================================
+# =====================================================
 
-vendas = filtro["VLVENDA"].sum()
+vendas = abs(
+    filtro["VLVENDA"].sum()
+)
 
 dev_total = abs(
     filtro["DEV_TOTAL"].sum()
@@ -194,51 +266,51 @@ perc_dev = (
     else 0
 )
 
-# ==========================================
+# =====================================================
 # CARDS
-# ==========================================
+# =====================================================
 
 c1,c2,c3,c4,c5,c6 = st.columns(6)
 
 with c1:
     st.metric(
         "VENDAS",
-        f"R$ {vendas:,.0f}"
+        moeda(vendas)
     )
 
 with c2:
     st.metric(
         "DEVOLUÇÕES",
-        f"R$ {dev_total:,.0f}"
+        moeda(dev_total)
     )
 
 with c3:
     st.metric(
         "GRANDES REDES",
-        f"R$ {grandes_redes:,.0f}"
+        moeda(grandes_redes)
     )
 
 with c4:
     st.metric(
         "TROCAS",
-        f"R$ {trocas:,.0f}"
+        moeda(trocas)
     )
 
 with c5:
     st.metric(
         "BONIFICAÇÕES",
-        f"R$ {bonificacoes:,.0f}"
+        moeda(bonificacoes)
     )
 
 with c6:
     st.metric(
         "% DEV",
-        f"{perc_dev:.2f}%"
+        percentual(perc_dev)
     )
 
-# ==========================================
+# =====================================================
 # ABAS
-# ==========================================
+# =====================================================
 
 aba1, aba2, aba3 = st.tabs(
     [
@@ -248,65 +320,97 @@ aba1, aba2, aba3 = st.tabs(
     ]
 )
 
-# ==========================================
+# =====================================================
 # RESUMO EXECUTIVO
-# ==========================================
+# =====================================================
 
 with aba1:
 
     col1, col2 = st.columns(2)
 
-    # ==================================
+    # ==========================================
     # DONUT
-    # ==================================
+    # ==========================================
 
     with col1:
 
         composicao = pd.DataFrame({
+
             "Categoria":[
+
                 "Grandes Redes",
                 "Dev. Normais",
                 "Trocas",
                 "Bonificações"
+
             ],
+
             "Valor":[
+
                 grandes_redes,
                 dev_normais,
                 trocas,
                 bonificacoes
+
             ]
+
         })
 
         fig_donut = px.pie(
+
             composicao,
+
             names="Categoria",
+
             values="Valor",
+
             hole=0.72,
+
             color="Categoria",
+
             color_discrete_map={
+
                 "Grandes Redes": AZUL,
                 "Dev. Normais": AMARELO,
                 "Trocas": "#4DA6FF",
                 "Bonificações": "#FFE082"
+
             }
+
         )
 
         fig_donut.update_traces(
+
             textinfo="percent",
-            textfont_size=14
+
+            textfont_size=14,
+
+            pull=[0.03,0,0,0]
+
         )
 
         fig_donut.update_layout(
+
             template="plotly_dark",
+
             paper_bgcolor=FUNDO,
+
             plot_bgcolor=FUNDO,
+
             font_color="white",
+
+            title="Composição Financeira",
+
             height=520,
+
             legend=dict(
+
                 orientation="h",
-                y=-0.2
-            ),
-            title="Composição Financeira"
+
+                y=-0.15
+
+            )
+
         )
 
         st.plotly_chart(
@@ -314,55 +418,84 @@ with aba1:
             use_container_width=True
         )
 
-    # ==================================
-    # TOP IMPACTO
-    # ==================================
+    # ==========================================
+    # TOP IMPACTO FINANCEIRO
+    # ==========================================
 
     with col2:
 
         impacto_rca = (
-            filtro.groupby("RCA")
-            ["IMPACTO_FINANCEIRO"]
+
+            filtro.groupby("RCA")[
+                "IMPACTO_FINANCEIRO"
+            ]
+
             .sum()
+
             .reset_index()
+
             .sort_values(
                 "IMPACTO_FINANCEIRO",
                 ascending=False
             )
+
             .head(15)
+
         )
 
         impacto_rca["RCA_CURTO"] = (
+
             impacto_rca["RCA"]
+
             .astype(str)
+
             .str[:35]
+
         )
 
         fig_impacto = px.bar(
+
             impacto_rca,
+
             x="IMPACTO_FINANCEIRO",
+
             y="RCA_CURTO",
+
             orientation="h",
+
             title="Top 15 Impacto Financeiro",
+
             color_discrete_sequence=[
                 AMARELO
             ]
+
         )
 
         fig_impacto.update_traces(
+
             marker_line_color=AZUL,
+
             marker_line_width=1.5
+
         )
 
         fig_impacto.update_layout(
+
             template="plotly_dark",
+
             paper_bgcolor=FUNDO,
+
             plot_bgcolor=FUNDO,
+
+            font_color="white",
+
             height=520,
+
             yaxis={
                 "categoryorder":
                 "total ascending"
             }
+
         )
 
         st.plotly_chart(
@@ -371,9 +504,9 @@ with aba1:
         )
 
     st.markdown("---")
-    # ==========================================
+        # =====================================================
     # PARETO DE DEVOLUÇÕES
-    # ==========================================
+    # =====================================================
 
     pareto = (
         filtro.groupby("RCA")["DEV_TOTAL"]
@@ -386,7 +519,10 @@ with aba1:
         )
     )
 
-    pareto["ACUMULADO"] = pareto["DEV_TOTAL"].cumsum()
+    pareto["ACUMULADO"] = (
+        pareto["DEV_TOTAL"]
+        .cumsum()
+    )
 
     pareto["PERC_ACUM"] = (
         pareto["ACUMULADO"]
@@ -397,7 +533,7 @@ with aba1:
     pareto["RCA_CURTO"] = (
         pareto["RCA"]
         .astype(str)
-        .str[:30]
+        .str[:25]
     )
 
     fig_pareto = go.Figure()
@@ -406,8 +542,8 @@ with aba1:
         go.Bar(
             x=pareto["RCA_CURTO"],
             y=pareto["DEV_TOTAL"],
-            marker_color=AZUL,
-            name="Devoluções"
+            name="Devoluções",
+            marker_color=AZUL
         )
     )
 
@@ -416,22 +552,25 @@ with aba1:
             x=pareto["RCA_CURTO"],
             y=pareto["PERC_ACUM"],
             mode="lines+markers",
+            yaxis="y2",
+            name="% Acumulado",
             line=dict(
                 color=AMARELO,
                 width=3
-            ),
-            yaxis="y2",
-            name="% Acumulado"
+            )
         )
     )
 
     fig_pareto.update_layout(
-        title="Pareto de Devoluções",
         template="plotly_dark",
         paper_bgcolor=FUNDO,
         plot_bgcolor=FUNDO,
-        height=500,
-        yaxis=dict(title="Valor"),
+        font_color="white",
+        title="Pareto de Devoluções",
+        height=550,
+        yaxis=dict(
+            title="Valor"
+        ),
         yaxis2=dict(
             title="% Acumulado",
             overlaying="y",
@@ -447,9 +586,9 @@ with aba1:
 
     st.markdown("---")
 
-    # ==========================================
-    # SCATTER
-    # ==========================================
+    # =====================================================
+    # SCATTER PLOT
+    # =====================================================
 
     scatter = (
         filtro.groupby("RCA")
@@ -483,6 +622,7 @@ with aba1:
         template="plotly_dark",
         paper_bgcolor=FUNDO,
         plot_bgcolor=FUNDO,
+        font_color="white",
         height=550
     )
 
@@ -491,9 +631,9 @@ with aba1:
         use_container_width=True
     )
 
-# ==========================================
+# =====================================================
 # ABA RANKINGS
-# ==========================================
+# =====================================================
 
 with aba2:
 
@@ -521,6 +661,21 @@ with aba2:
             ascending=False
         )
 
+        base[campo] = (
+            base[campo]
+            .map(moeda)
+        )
+
+        base["VLVENDA"] = (
+            base["VLVENDA"]
+            .map(moeda)
+        )
+
+        base["% SOBRE VENDA"] = (
+            base["% SOBRE VENDA"]
+            .map(percentual)
+        )
+
         st.subheader(titulo)
 
         st.dataframe(
@@ -529,7 +684,7 @@ with aba2:
             hide_index=True
         )
 
-    col_rank1,col_rank2 = st.columns(2)
+    col_rank1, col_rank2 = st.columns(2)
 
     with col_rank1:
 
@@ -557,17 +712,16 @@ with aba2:
 
     st.markdown("---")
 
-    # ==========================================
-    # GERENTES
-    # ==========================================
+    # =====================================================
+    # RANKING GERENTES
+    # =====================================================
 
     st.subheader("📊 Ranking Gerentes")
 
     gerentes = (
         filtro.groupby("NOMEGERENTE")
         .agg({
-            "DEV_TOTAL":"sum",
-            "VLVENDA":"sum"
+            "DEV_TOTAL":"sum"
         })
         .reset_index()
     )
@@ -576,12 +730,6 @@ with aba2:
         gerentes["DEV_TOTAL"]
         .abs()
     )
-
-    gerentes["% SOBRE VENDA"] = (
-        gerentes["DEV_TOTAL"]
-        /
-        gerentes["VLVENDA"]
-    ) * 100
 
     fig_ger = px.bar(
         gerentes.sort_values(
@@ -597,6 +745,7 @@ with aba2:
         template="plotly_dark",
         paper_bgcolor=FUNDO,
         plot_bgcolor=FUNDO,
+        font_color="white",
         height=450
     )
 
@@ -605,17 +754,16 @@ with aba2:
         use_container_width=True
     )
 
-    # ==========================================
-    # SUPERVISORES
-    # ==========================================
+    # =====================================================
+    # RANKING SUPERVISORES
+    # =====================================================
 
     st.subheader("👔 Ranking Supervisores")
 
     supervisores = (
         filtro.groupby("SUPERVISOR")
         .agg({
-            "DEV_TOTAL":"sum",
-            "VLVENDA":"sum"
+            "DEV_TOTAL":"sum"
         })
         .reset_index()
     )
@@ -624,12 +772,6 @@ with aba2:
         supervisores["DEV_TOTAL"]
         .abs()
     )
-
-    supervisores["% SOBRE VENDA"] = (
-        supervisores["DEV_TOTAL"]
-        /
-        supervisores["VLVENDA"]
-    ) * 100
 
     fig_sup = px.bar(
         supervisores.sort_values(
@@ -650,6 +792,7 @@ with aba2:
         template="plotly_dark",
         paper_bgcolor=FUNDO,
         plot_bgcolor=FUNDO,
+        font_color="white",
         height=450
     )
 
@@ -658,40 +801,30 @@ with aba2:
         use_container_width=True
     )
 
-# ==========================================
-# ABA ANALÍTICA
-# ==========================================
+# =====================================================
+# ABA BASE ANALÍTICA
+# =====================================================
 
 with aba3:
 
     st.subheader("📋 Base Analítica")
 
-    base_analitica = filtro[
-        [
-            "NOMEGERENTE",
-            "SUPERVISOR",
-            "RCA",
-            "VLVENDA",
-            "DEV_GRANDES_REDES",
-            "DEMAIS_DEV",
-            "TV11",
-            "TV5",
-            "DEV_TOTAL",
-            "IMPACTO_FINANCEIRO",
-            "CONTA_CORRENTE"
-        ]
-    ]
+    base_analitica = filtro.copy()
 
     st.dataframe(
         base_analitica,
         use_container_width=True,
-        height=650
+        height=700
     )
 
-    csv = base_analitica.to_csv(
-        index=False,
-        sep=";"
-    ).encode("utf-8")
+    csv = (
+        base_analitica
+        .to_csv(
+            index=False,
+            sep=";"
+        )
+        .encode("utf-8")
+    )
 
     st.download_button(
         "⬇️ Exportar CSV",
@@ -700,9 +833,9 @@ with aba3:
         "text/csv"
     )
 
-# ==========================================
+# =====================================================
 # RODAPÉ
-# ==========================================
+# =====================================================
 
 st.markdown(
     f"""
@@ -715,3 +848,5 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+#streamlit run app.py
