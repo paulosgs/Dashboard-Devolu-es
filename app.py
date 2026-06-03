@@ -18,7 +18,7 @@ CARD = "#111c2e"
 # ==========================================
 
 st.set_page_config(
-    page_title="Dashboard Devoluções - ABRIL 2026",
+    page_title="Dashboard Devoluções - MAIO 2026",
     page_icon="📊",
     layout="wide"
 )
@@ -167,7 +167,7 @@ col1, col2 = st.columns([4,1])
 with col1:
 
     st.title(
-        "📊 DASHBOARD DE DEVOLUÇÕES - ABRIL 2026"
+        "📊 DASHBOARD DE DEVOLUÇÕES - MAIO 2026"
     )
 
 with col2:
