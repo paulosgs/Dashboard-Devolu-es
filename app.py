@@ -167,7 +167,7 @@ col1, col2 = st.columns([4,1])
 with col1:
 
     st.title(
-        "📊 DASHBOARD DE DEVOLUÇÕES"
+        "📊 DASHBOARD DE DEVOLUÇÕES - Abril 2026"
     )
 
 with col2:
