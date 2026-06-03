@@ -18,7 +18,7 @@ CARD = "#111c2e"
 # ==========================================
 
 st.set_page_config(
-    page_title="Dashboard Devoluções",
+    page_title="Dashboard Devoluções - Abril 2026",
     page_icon="📊",
     layout="wide"
 )
