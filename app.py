@@ -80,7 +80,7 @@ unsafe_allow_html=True
 # UPLOAD
 # ==========================================
 
-st.sidebar.markdown("## 📤 Upload da Planilha")
+st.sidebar.markdown("## 📤 Upload da Planilha - Rotina 8079")
 
 arquivo = st.sidebar.file_uploader(
     "Selecione a planilha",
@@ -90,7 +90,7 @@ arquivo = st.sidebar.file_uploader(
 if arquivo is None:
 
     st.info(
-        "Faça upload da planilha para iniciar."
+        "Abra a Rotina 8079 no Winthor e Salve a planilha em formato .xlsx e faça upload da planilha para gerar o dashboard."
     )
 
     st.stop()
