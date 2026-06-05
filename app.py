@@ -251,32 +251,32 @@ perc_dev = (
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.metric("VENDAS", moeda(vendas))
+    st.metric("VENDAS TOTAIS - BNF E TROCA", moeda(vendas))
 
 with c2:
-    st.metric("DEVOLUÇÕES", moeda(dev_total))
+    st.metric("DEVOLUÇÕES TOTAIS", moeda(dev_total))
 
 with c3:
-    st.metric("GRANDES REDES", moeda(grandes_redes))
+    st.metric("DEVOLUÇÕES - GRANDES REDES", moeda(grandes_redes))
 
 with c4:
-    st.metric("TROCAS", moeda(trocas))
+    st.metric("TROCAS TOTAIS (TV11)", moeda(trocas))
 
 
 # SEGUNDA LINHA
 c5, c6, c7, c8 = st.columns(4)
 
 with c5:
-    st.metric("BONIFICAÇÕES", moeda(bonificacoes))
+    st.metric("BONIFICAÇÕES (TV5)", moeda(bonificacoes))
 
 with c6:
-    st.metric("% DEV", percentual(perc_dev))
+    st.metric("% DEVOLUÇÕES SOBRE A VENDA", percentual(perc_dev))
 
 with c7:
-    st.metric("ACIMA DA TABELA", moeda(acima_tabela))
+    st.metric("VENDIDOACIMA DA TABELA", moeda(acima_tabela))
 
 with c8:
-    st.metric("IMPACTO FINANCEIRO", moeda(impacto))
+    st.metric("IMPACTO FINANCEIRO NEGATIVO", moeda(impacto))
 
 # ==========================================
 # ABAS
