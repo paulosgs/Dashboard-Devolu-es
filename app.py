@@ -126,8 +126,7 @@ def carregar():
     )
 
     df["IMPACTO_FINANCEIRO"] = (
-    df["DEV_GRANDES_REDES"].abs()
-    + df["DEMAIS_DEV"].abs()
+    df["DEV_TOTAL"].abs()
     + df["TV11"].abs()
     + df["TV5"].abs()
 )
@@ -234,11 +233,9 @@ acima_tabela = abs(
 )
 
 impacto = (
-    vendas
-    - dev_total
-    - trocas
-    - bonificacoes
-    + acima_tabela
+    dev_total
+    + trocas
+    + bonificacoes
 )
 
 perc_dev = (
