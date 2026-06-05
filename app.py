@@ -247,49 +247,36 @@ perc_dev = (
 # CARDS
 # ==========================================
 
-c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
+# PRIMEIRA LINHA
+c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.metric(
-        "VENDAS",
-        moeda(vendas)
-    )
+    st.metric("VENDAS", moeda(vendas))
 
 with c2:
-    st.metric(
-        "DEVOLUÇÕES",
-        moeda(dev_total)
-    )
+    st.metric("DEVOLUÇÕES", moeda(dev_total))
 
 with c3:
-    st.metric(
-        "GRANDES REDES",
-        moeda(grandes_redes)
-    )
+    st.metric("GRANDES REDES", moeda(grandes_redes))
 
 with c4:
-    st.metric(
-        "TROCAS",
-        moeda(trocas)
-    )
+    st.metric("TROCAS", moeda(trocas))
+
+
+# SEGUNDA LINHA
+c5, c6, c7, c8 = st.columns(4)
 
 with c5:
-    st.metric(
-        "BONIFICAÇÕES",
-        moeda(bonificacoes)
-    )
+    st.metric("BONIFICAÇÕES", moeda(bonificacoes))
 
 with c6:
-    st.metric(
-        "% DEV",
-        percentual(perc_dev)
-    )
+    st.metric("% DEV", percentual(perc_dev))
 
 with c7:
-    st.metric(
-        "ACIMA DA TABELA",
-        moeda(acima_tabela)
-    )
+    st.metric("ACIMA DA TABELA", moeda(acima_tabela))
+
+with c8:
+    st.metric("IMPACTO FINANCEIRO", moeda(impacto))
 
 # ==========================================
 # ABAS
