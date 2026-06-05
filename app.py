@@ -756,7 +756,7 @@ with aba2:
     tipo_ordenacao = st.radio(
         "Ordenar Rankings por",
         [
-            "Valor",
+            "Valor total de Devolução",
             "% Sobre Venda"
         ],
         horizontal=True
@@ -792,7 +792,7 @@ with aba2:
         # ORDENAÇÃO
         # ==================================
 
-        if tipo_ordenacao == "Valor":
+        if tipo_ordenacao == "Valor total de Devolução":
 
             base = base.sort_values(
                 campo,
@@ -914,61 +914,129 @@ with aba2:
 
     st.markdown("---")
 
-    # ======================================
-    # TOP PIORES ÍNDICES
-    # ======================================
+# ======================================
+# TOP PIORES ÍNDICES
+# ======================================
 
-    indice = (
-        filtro.groupby("RCA")
-        .agg({
-            "DEV_TOTAL":"sum",
-            "VLVENDA":"sum"
-        })
-        .reset_index()
+indice = (
+    filtro.groupby("RCA")
+    .agg({
+        "DEV_TOTAL": "sum",
+        "VLVENDA": "sum"
+    })
+    .reset_index()
+)
+
+# ======================================
+# ELIMINA RCAS SEM VENDA
+# ======================================
+
+indice = indice[
+    indice["VLVENDA"] > 0
+]
+
+# ======================================
+# ELIMINA RCAS INATIVOS
+# (AJUSTE SE NECESSÁRIO)
+# ======================================
+
+VALOR_MINIMO_VENDA = 50000
+
+indice = indice[
+    indice["VLVENDA"] >= VALOR_MINIMO_VENDA
+]
+
+# ======================================
+# CALCULA PERCENTUAL
+# ======================================
+
+indice["PERCENTUAL_NUM"] = (
+    indice["DEV_TOTAL"].abs()
+    /
+    indice["VLVENDA"]
+) * 100
+
+# ======================================
+# REMOVE DISTORÇÕES
+# ======================================
+
+indice = indice[
+    indice["PERCENTUAL_NUM"] <= 50
+]
+
+# ======================================
+# ORDENA
+# ======================================
+
+indice = indice.sort_values(
+    "PERCENTUAL_NUM",
+    ascending=False
+)
+
+# ======================================
+# FORMATAÇÃO
+# ======================================
+
+indice["DEV_TOTAL_FMT"] = (
+    indice["DEV_TOTAL"]
+    .abs()
+    .apply(moeda)
+)
+
+indice["VLVENDA_FMT"] = (
+    indice["VLVENDA"]
+    .apply(moeda)
+)
+
+indice["PERCENTUAL"] = (
+    indice["PERCENTUAL_NUM"]
+    .apply(percentual)
+)
+
+# ======================================
+# EXIBIÇÃO
+# ======================================
+
+st.subheader(
+    "🚨 TOP 10 PIORES ÍNDICES DE DEVOLUÇÃO"
+)
+
+st.caption(
+    f"Considerando apenas RCAs com vendas acima de {moeda(VALOR_MINIMO_VENDA)}"
+)
+
+st.dataframe(
+    indice[
+        [
+            "RCA",
+            "DEV_TOTAL_FMT",
+            "VLVENDA_FMT",
+            "PERCENTUAL"
+        ]
+    ]
+    .rename(
+        columns={
+            "DEV_TOTAL_FMT": "DEVOLUÇÃO",
+            "VLVENDA_FMT": "VENDA",
+            "PERCENTUAL": "% DEV"
+        }
     )
+    .head(10),
+    use_container_width=True,
+    hide_index=True
+)
 
-    indice["PERCENTUAL"] = (
-        indice["DEV_TOTAL"]
-        /
-        indice["VLVENDA"]
-    ).fillna(0) * 100
-
-    indice = indice.sort_values(
-        "PERCENTUAL",
-        ascending=False
-    )
-
-    indice["PERCENTUAL"] = (
-        indice["PERCENTUAL"]
-        .apply(percentual)
-    )
-
-    st.subheader(
-        "🚨 TOP 10 PIORES ÍNDICES DE DEVOLUÇÃO"
-    )
-
-    st.dataframe(
-        indice[
-            [
-                "RCA",
-                "PERCENTUAL"
-            ]
-        ].head(10),
-        use_container_width=True,
-        hide_index=True
-    )
-
-    st.markdown("---")
+st.markdown("---")
 
     # ======================================
     # RANKING GERENTES
     # ======================================
 
-    st.subheader(
+st.subheader(
         "📊 RANKING GERENTES"
     )
 
-    gerentes_rank = (
+gerentes_rank = (
         filtro.groupby("NOMEGERENTE")
         ["DEV_TOTAL"]
         .sum()
@@ -980,21 +1048,21 @@ with aba2:
         )
     )
 
-    fig_ger = px.bar(
+fig_ger = px.bar(
         gerentes_rank,
         x="NOMEGERENTE",
         y="DEV_TOTAL",
         color_discrete_sequence=[AZUL]
     )
 
-    fig_ger.update_layout(
+fig_ger.update_layout(
         template="plotly_dark",
         paper_bgcolor=FUNDO,
         plot_bgcolor=FUNDO,
         height=450
     )
 
-    st.plotly_chart(
+st.plotly_chart(
         fig_ger,
         use_container_width=True
     )
@@ -1003,11 +1071,11 @@ with aba2:
     # RANKING SUPERVISORES
     # ======================================
 
-    st.subheader(
+st.subheader(
         "👔 RANKING SUPERVISORES"
     )
 
-    supervisores_rank = (
+supervisores_rank = (
         filtro.groupby("SUPERVISOR")
         ["DEV_TOTAL"]
         .sum()
@@ -1019,21 +1087,21 @@ with aba2:
         )
     )
 
-    fig_sup = px.bar(
+fig_sup = px.bar(
         supervisores_rank,
         x="SUPERVISOR",
         y="DEV_TOTAL",
         color_discrete_sequence=[AMARELO]
     )
 
-    fig_sup.update_layout(
+fig_sup.update_layout(
         template="plotly_dark",
         paper_bgcolor=FUNDO,
         plot_bgcolor=FUNDO,
         height=450
     )
 
-    st.plotly_chart(
+st.plotly_chart(
         fig_sup,
         use_container_width=True
     )
