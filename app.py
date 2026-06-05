@@ -284,7 +284,7 @@ with c7:
     st.metric("📈 VENDIDO ACIMA DA TABELA", moeda(acima_tabela))
 
 with c8:
-    st.metric("⚠️ IMPACTO FINANCEIRO NEGATIVO", moeda(impacto))
+    st.metric("✅ VENDA LÍQUIDA", moeda(impacto))
 
 # ==========================================
 # ABAS
