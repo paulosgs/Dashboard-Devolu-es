@@ -276,7 +276,7 @@ perc_dev = (
 # META
 # ==========================================
 
-META_DEV = 1.50
+META_DEV = 0.60
 
 status_meta = (
     "🟢 DENTRO DA META"
@@ -750,6 +750,19 @@ with aba1:
 with aba2:
 
     # ======================================
+    # TIPO DE ORDENAÇÃO
+    # ======================================
+
+    tipo_ordenacao = st.radio(
+        "Ordenar Rankings por",
+        [
+            "Valor",
+            "% Sobre Venda"
+        ],
+        horizontal=True
+    )
+
+    # ======================================
     # FUNÇÃO PADRÃO
     # ======================================
 
@@ -775,10 +788,27 @@ with aba2:
             base["VLVENDA"]
         ).fillna(0) * 100
 
-        base = base.sort_values(
-            campo,
-            ascending=False
-        )
+        # ==================================
+        # ORDENAÇÃO
+        # ==================================
+
+        if tipo_ordenacao == "Valor":
+
+            base = base.sort_values(
+                campo,
+                ascending=False
+            )
+
+        else:
+
+            base = base.sort_values(
+                "PERC_NUM",
+                ascending=False
+            )
+
+        # ==================================
+        # FORMATAÇÃO
+        # ==================================
 
         base["VALOR"] = (
             base[campo]
