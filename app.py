@@ -126,11 +126,15 @@ def carregar():
     )
 
     df["IMPACTO_FINANCEIRO"] = (
+    df["VLVENDA"]
+    - (
         df["DEV_GRANDES_REDES"].abs()
         + df["DEMAIS_DEV"].abs()
-        + df["TV11"].abs()
-        + df["TV5"].abs()
     )
+    - df["TV11"].abs()
+    - df["TV5"].abs()
+    + df["ACIMA_TABELA"].abs()
+)
 
     return df
 
@@ -233,8 +237,12 @@ acima_tabela = abs(
     filtro["ACIMA_TABELA"].sum()
 )
 
-impacto = abs(
-    filtro["IMPACTO_FINANCEIRO"].sum()
+impacto = (
+    vendas
+    - dev_total
+    - trocas
+    - bonificacoes
+    + acima_tabela
 )
 
 perc_dev = (
@@ -251,32 +259,32 @@ perc_dev = (
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.metric("VENDAS TOTAIS - BNF E TROCA", moeda(vendas))
+    st.metric("💰 VENDAS TOTAIS -BNF -TROCA", moeda(vendas))
 
 with c2:
-    st.metric("DEVOLUÇÕES TOTAIS", moeda(dev_total))
+    st.metric("↩️ DEVOLUÇÕES TOTAIS", moeda(dev_total))
 
 with c3:
-    st.metric("DEVOLUÇÕES - GRANDES REDES", moeda(grandes_redes))
+    st.metric("🏢 DEVOLUÇÕES - GRANDES REDES", moeda(grandes_redes))
 
 with c4:
-    st.metric("TROCAS TOTAIS (TV11)", moeda(trocas))
+    st.metric("🔄 TROCAS TOTAIS (TV11)", moeda(trocas))
 
 
 # SEGUNDA LINHA
 c5, c6, c7, c8 = st.columns(4)
 
 with c5:
-    st.metric("BONIFICAÇÕES (TV5)", moeda(bonificacoes))
+    st.metric("🎁 BONIFICAÇÕES (TV5)", moeda(bonificacoes))
 
 with c6:
-    st.metric("% DEVOLUÇÕES SOBRE A VENDA", percentual(perc_dev))
+    st.metric("📉 % DEVOLUÇÕES SOBRE A VENDA", percentual(perc_dev))
 
 with c7:
-    st.metric("VENDIDOACIMA DA TABELA", moeda(acima_tabela))
+    st.metric("📈 VENDIDO ACIMA DA TABELA", moeda(acima_tabela))
 
 with c8:
-    st.metric("IMPACTO FINANCEIRO NEGATIVO", moeda(impacto))
+    st.metric("⚠️ IMPACTO FINANCEIRO NEGATIVO", moeda(impacto))
 
 # ==========================================
 # ABAS
@@ -284,9 +292,9 @@ with c8:
 
 aba1, aba2, aba3 = st.tabs(
     [
-        "📊 Resumo Executivo",
-        "🏆 Rankings",
-        "📋 Base Analítica"
+        "📊 RESUMO EXECUTIVO",
+        "🏆 RANKINGS",
+        "📋 BASE ANALÍTICA"
     ]
 )
 # ==========================================
@@ -540,7 +548,8 @@ with aba1:
         fig_scatter,
         use_container_width=True
     )
-    # ==========================================
+
+# ==========================================
 # ABA 2 - RANKINGS
 # ==========================================
 
@@ -616,24 +625,24 @@ with aba2:
 
         ranking_rca(
             "DEV_GRANDES_REDES",
-            "🏢 Top 20 Grandes Redes"
+            "🏢 TOP 20 GRANDES REDES"
         )
 
         ranking_rca(
             "TV11",
-            "🔄 Top 20 Trocas"
+            "🔄 TOP 20 TROCAS"
         )
 
     with col2:
 
         ranking_rca(
             "DEMAIS_DEV",
-            "👥 Top 20 Devoluções Normais"
+            "👥 TOP 20 DEVOLUÇÕES NORMAIS"
         )
 
         ranking_rca(
             "TV5",
-            "🎁 Top 20 Bonificações"
+            "🎁 TOP 20 BONIFICAÇÕES"
         )
 
     st.markdown("---")
@@ -642,7 +651,7 @@ with aba2:
     # RANKING GERENTES
     # ======================================
 
-    st.subheader("📊 Ranking Gerentes")
+    st.subheader("📊 RANKING - DEVOLUÇÃO DOS GERENTES")
 
     gerentes = (
         filtro
@@ -679,7 +688,7 @@ with aba2:
     # RANKING SUPERVISORES
     # ======================================
 
-    st.subheader("👔 Ranking Supervisores")
+    st.subheader("👔 RANKING - DEVOLUÇÃO DOS SUPERVISORES")
 
     supervisores = (
         filtro
@@ -756,7 +765,7 @@ st.markdown("---")
 st.markdown(
     """
 <div style='text-align:center;color:#A9B4C2;padding:15px'>
-Dashboard de Devoluções • Distrinorte • Maio/2026
+Dashboard de Devoluções • Distrinorte • Maio/2026 - By Paulo Gusmão - T.I Distrinorte
 </div>
 """,
     unsafe_allow_html=True
