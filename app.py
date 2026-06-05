@@ -126,14 +126,10 @@ def carregar():
     )
 
     df["IMPACTO_FINANCEIRO"] = (
-    df["VLVENDA"]
-    - (
-        df["DEV_GRANDES_REDES"].abs()
-        + df["DEMAIS_DEV"].abs()
-    )
-    - df["TV11"].abs()
-    - df["TV5"].abs()
-    + df["ACIMA_TABELA"].abs()
+    df["DEV_GRANDES_REDES"].abs()
+    + df["DEMAIS_DEV"].abs()
+    + df["TV11"].abs()
+    + df["TV5"].abs()
 )
 
     return df
@@ -259,7 +255,7 @@ perc_dev = (
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.metric("💰 VENDAS TOTAIS -BNF -TROCA", moeda(vendas))
+    st.metric("💰 VENDAS FATURADAS - DEVOLUÇÕES (ROTINA 111)", moeda(vendas))
 
 with c2:
     st.metric("↩️ DEVOLUÇÕES TOTAIS", moeda(dev_total))
@@ -284,7 +280,7 @@ with c7:
     st.metric("📈 VENDIDO ACIMA DA TABELA", moeda(acima_tabela))
 
 with c8:
-    st.metric("✅ VENDA LÍQUIDA", moeda(impacto))
+    st.metric("⚠️ IMPACTO FINANCEIRO NEGATIVO", moeda(impacto))
 
 # ==========================================
 # ABAS
