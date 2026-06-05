@@ -19,7 +19,7 @@ VERDE = "#00CC96"
 # ==========================================
 
 st.set_page_config(
-    page_title="Dashboard Devoluções - MAIO 2026",
+    page_title="Dashboard Devoluções",
     page_icon="📊",
     layout="wide"
 )
@@ -203,7 +203,7 @@ col1, col2 = st.columns([4, 1])
 
 with col1:
     st.title(
-        "📊 DASHBOARD DE DEVOLUÇÕES - MAIO 2026"
+        "📊 DASHBOARD DE DEVOLUÇÕES"
     )
 
 with col2:
