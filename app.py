@@ -80,13 +80,30 @@ h1,h2,h3,h4 {{
 # PLANILHA
 # ==========================================
 
-ARQUIVO = "dados/Analise_Conta_Corrente.xlsx"
+# ==========================================
+# UPLOAD DA PLANILHA
+# ==========================================
+
+st.sidebar.markdown("## 📤 Upload da Planilha")
+
+arquivo = st.sidebar.file_uploader(
+    "Selecione o arquivo Excel",
+    type=["xlsx"]
+)
+
+if arquivo is None:
+
+    st.info(
+        "Faça upload da planilha para iniciar a análise."
+    )
+
+    st.stop()
 
 
 @st.cache_data
-def carregar():
+def carregar(arquivo):
 
-    df = pd.read_excel(ARQUIVO)
+    df = pd.read_excel(arquivo)
 
     campos = [
         "CONTA_CORRENTE",
@@ -134,7 +151,11 @@ def carregar():
     return df
 
 
-df = carregar()
+df = carregar(arquivo)
+
+st.sidebar.success(
+    f"Arquivo carregado: {arquivo.name}"
+)
 
 # ==========================================
 # FILTROS
@@ -261,7 +282,7 @@ with c3:
     st.metric("🏢 DEVOLUÇÕES - GRANDES REDES", moeda(grandes_redes))
 
 with c4:
-    st.metric("🔄 TROCAS TOTAIS (TV11)", moeda(trocas))
+    st.metric("🔄 TROCAS (FORA GRANDES REDES)", moeda(trocas))
 
 
 # SEGUNDA LINHA
@@ -446,30 +467,34 @@ with aba1:
 
     fig_pareto = go.Figure()
 
-    fig_pareto.add_trace(
-        go.Bar(
-            x=pareto["RCA_CURTO"],
-            y=pareto["DEV_TOTAL"],
-            marker_color=AZUL,
-            name="Devoluções"
-        )
+fig_pareto.add_trace(
+    go.Scatter(
+        x=pareto["RCA_CURTO"],
+        y=pareto["DEV_TOTAL"],
+        mode="lines+markers",
+        line=dict(
+            color=AZUL,
+            width=3
+        ),
+        name="Devoluções"
     )
+)
 
-    fig_pareto.add_trace(
-        go.Scatter(
-            x=pareto["RCA_CURTO"],
-            y=pareto["PERC_ACUM"],
-            mode="lines+markers",
-            yaxis="y2",
-            line=dict(
-                color=AMARELO,
-                width=3
-            ),
-            name="% Acumulado"
-        )
+fig_pareto.add_trace(
+    go.Scatter(
+        x=pareto["RCA_CURTO"],
+        y=pareto["PERC_ACUM"],
+        mode="lines+markers",
+        yaxis="y2",
+        line=dict(
+            color=AMARELO,
+            width=3
+        ),
+        name="% Acumulado"
     )
+)
 
-    fig_pareto.update_layout(
+fig_pareto.update_layout(
         template="plotly_dark",
         paper_bgcolor=FUNDO,
         plot_bgcolor=FUNDO,
@@ -487,18 +512,18 @@ with aba1:
         )
     )
 
-    st.plotly_chart(
+st.plotly_chart(
         fig_pareto,
         use_container_width=True
     )
 
-    st.markdown("---")
+st.markdown("---")
 
     # ======================================
     # SCATTER
     # ======================================
 
-    scatter = (
+scatter = (
         filtro
         .groupby("RCA")
         .agg(
@@ -510,37 +535,57 @@ with aba1:
         .reset_index()
     )
 
-    fig_scatter = px.scatter(
-        scatter,
-        x="VLVENDA",
-        y="IMPACTO_FINANCEIRO",
-        hover_name="RCA",
-        title="Venda x Impacto Financeiro",
-        color_discrete_sequence=[AMARELO]
+scatter = (
+    filtro
+    .groupby("RCA")
+    .agg(
+        {
+            "VLVENDA":"sum",
+            "IMPACTO_FINANCEIRO":"sum"
+        }
     )
+    .reset_index()
+    .sort_values(
+        "VLVENDA"
+    )
+)
 
-    fig_scatter.update_traces(
-        marker=dict(
-            size=12,
-            line=dict(
-                color=AZUL,
-                width=2
-            )
+fig_scatter = go.Figure()
+
+fig_scatter.add_trace(
+    go.Scatter(
+        x=scatter["RCA"],
+        y=scatter["VLVENDA"],
+        mode="lines",
+        name="Venda",
+        line=dict(
+            color=AZUL,
+            width=3
         )
     )
+)
 
-    fig_scatter.update_layout(
-        template="plotly_dark",
-        paper_bgcolor=FUNDO,
-        plot_bgcolor=FUNDO,
-        font_color="white",
-        height=550
+fig_scatter.add_trace(
+    go.Scatter(
+        x=scatter["RCA"],
+        y=scatter["IMPACTO_FINANCEIRO"],
+        mode="lines",
+        name="Impacto Financeiro",
+        line=dict(
+            color=AMARELO,
+            width=3
+        )
     )
+)
 
-    st.plotly_chart(
-        fig_scatter,
-        use_container_width=True
-    )
+fig_scatter.update_layout(
+    template="plotly_dark",
+    paper_bgcolor=FUNDO,
+    plot_bgcolor=FUNDO,
+    font_color="white",
+    title="Venda x Impacto Financeiro",
+    height=550
+)
 
 # ==========================================
 # ABA 2 - RANKINGS
