@@ -348,7 +348,7 @@ with c7:
 with c8:
 
     st.metric(
-        "⚠️ DEVOLUÇÃO + TROCAS + BONIFICAÇÕES - ACIMA TABELA",
+        "↩️ + 🔄 + 🎁 - 📈",
         moeda(impacto)
     )
 
