@@ -348,7 +348,7 @@ with c7:
 with c8:
 
     st.metric(
-        "⚠️ IMPACTO",
+        "⚠️ DEVOLUÇÃO + TROCAS + BONIFICAÇÕES - ACIMA TABELA",
         moeda(impacto)
     )
 
@@ -429,14 +429,14 @@ except:
 
 aba1, aba2, aba3 = st.tabs(
     [
-        "📊 RESUMO EXECUTIVO",
+        "📊 GRÁFICOS DE RESUMO",
         "🏆 RANKINGS",
         "📋 BASE ANALÍTICA"
     ]
 )
 
 # ==========================================
-# ABA 1 - RESUMO EXECUTIVO
+# ABA 1 - GRÁFICOS DE RESUMO
 # ==========================================
 
 with aba1:
@@ -837,7 +837,7 @@ with aba2:
         st.subheader(titulo)
 
         st.dataframe(
-            base.head(20),
+            base.head(50),
             use_container_width=True,
             hide_index=True
         )
@@ -852,29 +852,29 @@ with aba2:
 
         ranking_rca(
             "DEV_GRANDES_REDES",
-            "🏢 TOP 20 GRANDES REDES"
+            "🏢 RANKING GRANDES REDES"
         )
 
         ranking_rca(
             "TV11",
-            "🔄 TOP 20 TROCAS"
+            "🔄 RANKING TROCAS"
         )
 
         ranking_rca(
             "ACIMA_TABELA",
-            "📈 TOP 20 ACIMA DA TABELA"
+            "📈 RANKING VENDIDO ACIMA DA TABELA"
         )
 
     with col2:
 
         ranking_rca(
             "DEMAIS_DEV",
-            "👥 TOP 20 DEVOLUÇÕES NORMAIS"
+            "👥 RANKING DEVOLUÇÕES NORMAIS"
         )
 
         ranking_rca(
             "TV5",
-            "🎁 TOP 20 BONIFICAÇÕES"
+            "🎁 RANKING BONIFICAÇÕES"
         )
 
     st.markdown("---")
@@ -901,7 +901,7 @@ with aba2:
     )
 
     st.subheader(
-        "🏆 TOP 20 IMPACTO FINANCEIRO"
+        "🏆 RANKING IMPACTO FINANCEIRO"
     )
 
     st.dataframe(
@@ -998,7 +998,7 @@ indice["PERCENTUAL"] = (
 # ======================================
 
 st.subheader(
-    "🚨 TOP 10 PIORES ÍNDICES DE DEVOLUÇÃO"
+    "🚨 RANKING PIORES ÍNDICES DE DEVOLUÇÃO"
 )
 
 st.caption(
